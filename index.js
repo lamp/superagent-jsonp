@@ -12,14 +12,19 @@ var serialise = function(obj) {
   return pairs.join('&');
 }
 
-module.exports = function(superagent) {
-	var Request = superagent.Request;
+// Prefer node/browserify style requires
+if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
+  module.exports = function(superagent) {
+    var Request = superagent.Request;
 
-	Request.prototype.jsonp = jsonp;
-	Request.prototype.end = end;
+    Request.prototype.jsonp = jsonp;
+    Request.prototype.end = end;
 
-	return superagent;
-};
+    return superagent;
+  };
+} else if (typeof window !== 'undefined'){
+  window.superagentJSONP = jsonp;
+}
 
 var jsonp = function(options){
 	var options = options || {};
@@ -36,7 +41,7 @@ var jsonp = function(options){
 
 var end = function(callback){
 	this.callback = callback;
-	
+
 	this._query.push(serialise({ callback : this.callbackName }));
 	var queryString = this._query.join('&');
 
