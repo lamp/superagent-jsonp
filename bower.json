@@ -21,5 +21,9 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "superagent": "~0.21.0",
+    "underscore": "~1.7.0"
+  }
 }
