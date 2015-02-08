@@ -1,0 +1,27 @@
+{
+  "name": "superagent-jsonp",
+  "version": "0.0.1",
+  "description": "Wrap a sweet jsonp filling in a savoury superagent wrapper",
+  "main": "index.js",
+  "dependencies": {
+    "superagent": "^0.21.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lamp/superagent-jsonp.git"
+  },
+  "keywords": [
+    "jsonp",
+    "superagent"
+  ],
+  "author": "lamp",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/lamp/superagent-jsonp/issues"
+  },
+  "homepage": "https://github.com/lamp/superagent-jsonp"
+}
