@@ -1,4 +1,6 @@
-var _ = require('underscore');
+if(typeof _ === 'undefined'){
+  var _ = require('underscore');
+}
 
 var serialise = function(obj) {
   if (!_.isObject(obj)) return obj;
