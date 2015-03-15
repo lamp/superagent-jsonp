@@ -4,7 +4,8 @@
   "description": "Wrap a sweet jsonp filling in a savoury superagent wrapper",
   "main": "index.js",
   "dependencies": {
-    "superagent": "^0.21.0"
+    "superagent": "^0.21.0",
+    "underscore": "^1.8.2"
   },
   "devDependencies": {},
   "scripts": {
