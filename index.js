@@ -33,12 +33,18 @@ var jsonp = function(options){
 	this.options = _.defaults(options, { callbackName : 'cb' });
 	this.callbackName = 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000);
 
-
-	window[this.callbackName] = function(data){
-		this.callback.apply(this, [data]);
-	}.bind(this);
+	window[this.callbackName] = callbackWrapper.bind(this);
 
 	return this;
+};
+
+var callbackWrapper = function(data) {
+	var err = null;
+	var res = {
+		body: data
+	};
+
+	this.callback.apply(this, [err, res]);
 };
 
 var end = function(callback){
