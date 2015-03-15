@@ -47,8 +47,8 @@ var end = function(callback){
 	this._query.push(serialise({ callback : this.callbackName }));
 	var queryString = this._query.join('&');
 
-        var s = document.createElement('script');
-        var separator = (this.url.indexOf('?') > -1) ? '&': '?';
+	var s = document.createElement('script');
+	var separator = (this.url.indexOf('?') > -1) ? '&': '?';
 	var url = this.url + separator + queryString;
 
 	s.src = url;
