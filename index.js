@@ -48,7 +48,8 @@ var end = function(callback){
 	var queryString = this._query.join('&');
 
 	var s = document.createElement('script');
-	var url = this.url + '?' + queryString;
+	var separator = (this.url.indexOf('?') > -1) ? '&': '?';
+	var url = this.url + separator + queryString;
 
 	s.src = url;
 
