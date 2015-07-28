@@ -1,11 +1,10 @@
 {
   "name": "superagent-jsonp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Wrap a sweet jsonp filling in a savoury superagent wrapper",
   "main": "index.js",
   "dependencies": {
-    "superagent": "^0.21.0",
-    "underscore": "^1.7.0"
+    "superagent": "^0.21.0"
   },
   "devDependencies": {},
   "scripts": {

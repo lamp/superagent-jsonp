@@ -1,9 +1,6 @@
-if(typeof _ === 'undefined'){
-  var _ = require('underscore');
-}
 
 var serialise = function(obj) {
-  if (!_.isObject(obj)) return obj;
+  if (typeof obj != 'object') return obj;
   var pairs = [];
   for (var key in obj) {
     if (null != obj[key]) {
@@ -29,12 +26,8 @@ if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 }
 
 var jsonp = function(options){
-	var options = options || {};
-	this.options = _.defaults(options, { callbackName : 'cb' });
 	this.callbackName = 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000);
-
 	window[this.callbackName] = callbackWrapper.bind(this);
-
 	return this;
 };
 
