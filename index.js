@@ -17,7 +17,8 @@ if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
     var Request = superagent.Request;
 
     Request.prototype.jsonp = jsonp;
-    Request.prototype.end = end;
+    if( typeof window !== 'undefined' )
+    	Request.prototype.end = end;
 
     return superagent;
   };
@@ -26,6 +27,7 @@ if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 }
 
 var jsonp = function(options){
+	if( typeof window == 'undefined' ) return this;
 	this.callbackName = 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000);
 	window[this.callbackName] = callbackWrapper.bind(this);
 	return this;
