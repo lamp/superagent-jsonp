@@ -20,7 +20,9 @@ if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
     var Request = superagent.Request;
 
     Request.prototype.jsonp = jsonp;
-    Request.prototype.end = end;
+    if (typeof window !== 'undefined') {
+	Request.prototype.end = end;
+    }
 
     return superagent;
   };
@@ -29,8 +31,11 @@ if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 }
 
 var jsonp = function(options){
-	this.callbackName = 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000);
-	window[this.callbackName] = callbackWrapper.bind(this);
+	if (typeof window !== 'undefined') {
+	      this.callbackParam = options.callbackParam || 'callback';
+	      this.callbackName = 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000);
+	      window[this.callbackName] = callbackWrapper.bind(this);
+	}
 	return this;
 };
 
@@ -46,7 +51,9 @@ var callbackWrapper = function(data) {
 var end = function(callback){
 	this.callback = callback;
 
-	this._query.push(serialise({ callback : this.callbackName }));
+	var dict = {};
+	dict[this.callbackParam] = this.callbackName;
+	this._query.push(serialise(dict));
 	var queryString = this._query.join('&');
 
 	var s = document.createElement('script');
