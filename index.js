@@ -1,4 +1,3 @@
-
 var serialise = function(obj) {
   if (typeof obj != 'object') return obj;
   var pairs = [];
@@ -14,6 +13,10 @@ var serialise = function(obj) {
 // Prefer node/browserify style requires
 if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
   module.exports = function(superagent) {
+    // In the case that this library happens to be required in a nodejs environment
+    // return and do nothing to avoid breaking things
+    if(typeof window == 'undefined') return superagent;
+
     var Request = superagent.Request;
 
     Request.prototype.jsonp = jsonp;
