@@ -2,11 +2,14 @@
   "name": "superagent-jsonp",
   "version": "0.0.6",
   "description": "Wrap a sweet jsonp filling in a savoury superagent wrapper",
-  "main": "index.js",
+  "main": "dist/superagent-jsonp.js",
   "dependencies": {
-    "superagent": "^0.21.0"
+    "superagent": ">=1.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
