@@ -1,6 +1,6 @@
 {
   "name": "superagent-jsonp",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "homepage": "https://github.com/lamp/superagent-jsonp",
   "authors": [
     "Matthew Gradidge <matthew.gradidge@gmail.com>"
@@ -23,6 +23,6 @@
     "tests"
   ],
   "dependencies": {
-    "superagent": "~0.21.0",
+    "superagent": ">=1.4,
   }
 }
