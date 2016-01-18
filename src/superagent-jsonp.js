@@ -50,7 +50,7 @@ let end = function(callback) {
 	s.src = url;
 	document.getElementsByTagName('head')[0].appendChild(s);
 
-  return this;
+	return this;
 };
 
 // Prefer node/browserify style requires
