@@ -14,7 +14,9 @@ var superagent = require('superagent');
 
 let jsonp = require('superagent-jsonp');
 
-superagent.get('http://example.com/foo.json').use(jsonp).end(function(err, res){
+superagent.get('http://example.com/foo.json').use(jsonp({
+ callbackParam:'jsoncallback'
+})).end(function(err, res){
   // everything is as normal
 });
 
