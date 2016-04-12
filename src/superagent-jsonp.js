@@ -10,12 +10,20 @@ let serialise = function(obj) {
   return pairs.join('&');
 }
 
-let jsonp = function(request) {
-  // In case this is in nodejs, run without modifying request
-  if(typeof window == 'undefined') return request;
+let jsonp = function(requestOrConfig) {
+	var reqFunc = function(request) {
+		// In case this is in nodejs, run without modifying request
+		if (typeof window == 'undefined') return request;
 
-  request.end = end.bind(request);
-  return request;
+		request.end = end.bind(request)(requestOrConfig);
+		return request;
+	};
+	// if requestOrConfig is request
+	if(typeof requestOrConfig.end == 'function') {
+		return reqFunc(requestOrConfig);
+	} else {
+		return reqFunc;
+	}
 };
 
 let callbackWrapper = function(data) {
@@ -27,30 +35,32 @@ let callbackWrapper = function(data) {
 	this._jsonp.callback.call(this, err, res);
 };
 
-let end = function(callback) {
-  this._jsonp = {
-    callbackParam: 'callback',
-    callbackName:  'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
-    callback:       callback
-  };
+let end = function(config) {
+	return function(callback) {
+		this._jsonp = {
+			callbackParam: config.callbackParam || 'callback',
+			callbackName:  'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
+			callback:				callback
+		};
 
-	window[this._jsonp.callbackName] = callbackWrapper.bind(this);
+		window[this._jsonp.callbackName] = callbackWrapper.bind(this);
 
-  let params = {
-    [this._jsonp.callbackParam]: this._jsonp.callbackName
-  };
+		let params = {
+			[this._jsonp.callbackParam]: this._jsonp.callbackName
+		};
 
-	this._query.push(serialise(params));
-	let queryString = this._query.join('&');
+		this._query.push(serialise(params));
+		let queryString = this._query.join('&');
 
-	let s = document.createElement('script');
-	let separator = (this.url.indexOf('?') > -1) ? '&': '?';
-	let url = this.url + separator + queryString;
+		let s = document.createElement('script');
+		let separator = (this.url.indexOf('?') > -1) ? '&': '?';
+		let url = this.url + separator + queryString;
 
-	s.src = url;
-	document.getElementsByTagName('head')[0].appendChild(s);
+		s.src = url;
+		document.getElementsByTagName('head')[0].appendChild(s);
 
-	return this;
+		return this;
+	}
 };
 
 // Prefer node/browserify style requires
