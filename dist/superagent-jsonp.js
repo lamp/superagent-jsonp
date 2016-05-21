@@ -1,60 +1,70 @@
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var serialise = function serialise(obj) {
-  if (typeof obj != 'object') return obj;
-  var pairs = [];
-  for (var key in obj) {
-    if (null != obj[key]) {
-      pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
-    }
-  }
-  return pairs.join('&');
+	if (typeof obj != 'object') return obj;
+	var pairs = [];
+	for (var key in obj) {
+		if (null != obj[key]) {
+			pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+		}
+	}
+	return pairs.join('&');
 };
 
-var jsonp = function jsonp(request) {
-  // In case this is in nodejs, run without modifying request
-  if (typeof window == 'undefined') return request;
+var jsonp = function jsonp(requestOrConfig) {
+	var reqFunc = function reqFunc(request) {
+		// In case this is in nodejs, run without modifying request
+		if (typeof window == 'undefined') return request;
 
-  request.end = end.bind(request);
-  return request;
+		request.end = end.bind(request)(requestOrConfig);
+		return request;
+	};
+	// if requestOrConfig is request
+	if (typeof requestOrConfig.end == 'function') {
+		return reqFunc(requestOrConfig);
+	} else {
+		return reqFunc;
+	}
 };
 
 var callbackWrapper = function callbackWrapper(data) {
-  var err = null;
-  var res = {
-    body: data
-  };
+	var err = null;
+	var res = {
+		body: data
+	};
 
-  this._jsonp.callback.call(this, err, res);
+	this._jsonp.callback.call(this, err, res);
 };
 
-var end = function end(callback) {
-  this._jsonp = {
-    callbackParam: 'callback',
-    callbackName: 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
-    callback: callback
-  };
+var end = function end(config) {
+	return function (callback) {
+		this._jsonp = {
+			callbackParam: config.callbackParam || 'callback',
+			callbackName: 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
+			callback: callback
+		};
 
-  window[this._jsonp.callbackName] = callbackWrapper.bind(this);
+		window[this._jsonp.callbackName] = callbackWrapper.bind(this);
 
-  var params = _defineProperty({}, this._jsonp.callbackParam, this._jsonp.callbackName);
+		var params = _defineProperty({}, this._jsonp.callbackParam, this._jsonp.callbackName);
 
-  this._query.push(serialise(params));
-  var queryString = this._query.join('&');
+		this._query.push(serialise(params));
+		var queryString = this._query.join('&');
 
-  var s = document.createElement('script');
-  var separator = this.url.indexOf('?') > -1 ? '&' : '?';
-  var url = this.url + separator + queryString;
+		var s = document.createElement('script');
+		var separator = this.url.indexOf('?') > -1 ? '&' : '?';
+		var url = this.url + separator + queryString;
 
-  s.src = url;
-  document.getElementsByTagName('head')[0].appendChild(s);
+		s.src = url;
+		document.getElementsByTagName('head')[0].appendChild(s);
 
-  return this;
+		return this;
+	};
 };
 
 // Prefer node/browserify style requires
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = jsonp;
+	module.exports = jsonp;
 } else if (typeof window !== 'undefined') {
-  window.superagentJSONP = jsonp;
+	window.superagentJSONP = jsonp;
 }

@@ -1,6 +1,6 @@
 {
   "name": "superagent-jsonp",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Wrap a sweet jsonp filling in a savoury superagent wrapper",
   "main": "dist/superagent-jsonp.js",
   "dependencies": {
