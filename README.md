@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/lamp/superagent-jsonp/tree/master.svg?style=svg)](https://circleci.com/gh/lamp/superagent-jsonp/tree/master)
 # superagent-jsonp
 Adds jsonp behaviour to superagent.
 
