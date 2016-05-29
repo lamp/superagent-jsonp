@@ -4,10 +4,10 @@
   "description": "Wrap a sweet jsonp filling in a savoury superagent wrapper",
   "main": "dist/superagent-jsonp.js",
   "dependencies": {
-    "jsdom": "^6.5.1",
     "superagent": ">=1.4"
   },
   "devDependencies": {
+    "jsdom": "^9.2.1",
     "babel-core": "^6.9.0",
     "babel-loader": "^6.2.4",
     "babel-polyfill": "^6.9.0",
@@ -15,7 +15,7 @@
     "babel-register": "^6.9.0",
     "chai": "^3.3.0",
     "gulp": "^3.9.0",
-    "gulp-babel": "^5.2.1",
+    "gulp-babel": "^6.1.2",
     "mocha-babel": "^3.0.0",
     "webpack": "^1.13.1"
   },
