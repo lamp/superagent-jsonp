@@ -1,5 +1,6 @@
 [![CircleCI](https://circleci.com/gh/lamp/superagent-jsonp/tree/master.svg?style=svg)](https://circleci.com/gh/lamp/superagent-jsonp/tree/master)
-[![bitHound Overall Score](https://www.bithound.io/github/lamp/superagent-jsonp/badges/score.svg)](https://www.bithound.io/github/lamp/superagent-jsonp)# superagent-jsonp
+[![bitHound Overall Score](https://www.bithound.io/github/lamp/superagent-jsonp/badges/score.svg)](https://www.bithound.io/github/lamp/superagent-jsonp)
+# superagent-jsonp
 Adds jsonp behaviour to superagent.
 
 ## To use with browserify
