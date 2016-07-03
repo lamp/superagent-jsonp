@@ -4,6 +4,6 @@ require("babel-polyfill");
 
 gulp.task('default', function () {
     return gulp.src('src/superagent-jsonp.js')
-        .pipe(babel({ blacklist: ['strict'] }))
+        .pipe(babel())
         .pipe(gulp.dest('dist'));
 });
