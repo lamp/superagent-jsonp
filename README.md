@@ -38,5 +38,24 @@ superagent.get('http://example.com/foo.json').use(superagentJSONP).end(function(
 });
 ```
 
+## Available options for the jsonp function
+
+- callbackName: The name of the query parameter that contains the
+  function name to call defaults to `callback`
+- timeout: How long to wait until this is considered to be an
+  unsuccessful request.
+    - Note: all unsuccessful requests are currently treated as 404s
+
+### Usage
+  ```
+  superagent
+    .get('http://example.com/obviously_404.json').use(jsonp({
+      timeout: 3000,
+      callbackName: 'someOtherName'
+      })).end((err, response) => {
+        // response => {}
+        // err => new Error('404 NotFound')
+      });
+  ```
 
 

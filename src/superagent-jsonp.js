@@ -26,24 +26,37 @@ let jsonp = function(requestOrConfig) {
 	}
 };
 
-let callbackWrapper = function(data) {
+jsonp.callbackWrapper = function(data) {
 	let err = null;
 	let res = {
 		body: data
 	};
+  clearTimeout(this._jsonp.timeout);
 
 	this._jsonp.callback.call(this, err, res);
 };
 
-let end = function(config) {
+jsonp.errorWrapper = function() {
+  const err = new Error('404 NotFound');
+  this._jsonp.callback.call(this, err, null);
+};
+
+let end = function(config = { timeout: 1000 }) {
 	return function(callback) {
+
+    let timeout = setTimeout(
+      jsonp.errorWrapper.bind(this),
+      config.timeout
+    );
+
 		this._jsonp = {
 			callbackParam: config.callbackParam || 'callback',
 			callbackName:  'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
-			callback:				callback
+			callback:				callback,
+      timeout:        timeout
 		};
 
-		window[this._jsonp.callbackName] = callbackWrapper.bind(this);
+		window[this._jsonp.callbackName] = jsonp.callbackWrapper.bind(this);
 
 		let params = {
 			[this._jsonp.callbackParam]: this._jsonp.callbackName
