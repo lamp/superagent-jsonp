@@ -55,7 +55,7 @@ var end = function end() {
 
 		this._jsonp = {
 			callbackParam: config.callbackParam || 'callback',
-			callbackName: 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
+			callbackName: config.callbackName || 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
 			callback: callback,
 			timeout: timeout
 		};
