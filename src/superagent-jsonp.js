@@ -79,6 +79,8 @@ let end = function(config = { timeout: 1000 }) {
 // Prefer node/browserify style requires
 if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
   module.exports = jsonp;
-}  else if (typeof window !== 'undefined'){
+} else if(typeof define==="function"&&define.amd) {
+	define([],function(){ return { jsonp: jsonp }; });
+} else if (typeof window !== 'undefined'){
   window.superagentJSONP = jsonp;
 }
