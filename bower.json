@@ -6,7 +6,7 @@
     "Matthew Gradidge <matthew.gradidge@gmail.com>"
   ],
   "description": "A small wrapper for managing jsonp requests inside superagent",
-  "main": "index.js",
+  "main": "dist/superagent-jsonp.js",
   "moduleType": [
     "node"
   ],
@@ -20,10 +20,10 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
     "src"
   ],
   "dependencies": {
-    "superagent": ">=1.4,
+    "superagent": ">=1.4"
   }
 }

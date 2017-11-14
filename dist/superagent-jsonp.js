@@ -1,18 +1,12 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var removeCallback = function removeCallback() {
+	var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+	    script = _ref.script,
+	    callbackName = _ref.callbackName;
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var serialise = function serialise(obj) {
-	if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) != 'object') return obj;
-	var pairs = [];
-	for (var key in obj) {
-		if (null != obj[key]) {
-			pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
-		}
-	}
-	return pairs.join('&');
+	script && script.parentNode && script.parentNode.removeChild(script);
+	delete window[callbackName];
 };
 
 var jsonp = function jsonp(requestOrConfig) {
@@ -20,9 +14,10 @@ var jsonp = function jsonp(requestOrConfig) {
 		// In case this is in nodejs, run without modifying request
 		if (typeof window == 'undefined') return request;
 
-		request.end = end.bind(request)(requestOrConfig);
+		request.end = end.call(request, requestOrConfig);
 		return request;
 	};
+
 	// if requestOrConfig is request
 	if (typeof requestOrConfig.end == 'function') {
 		return reqFunc(requestOrConfig);
@@ -31,48 +26,56 @@ var jsonp = function jsonp(requestOrConfig) {
 	}
 };
 
-jsonp.callbackWrapper = function (data) {
+jsonp.callbackWrapper = function (body) {
 	var err = null;
-	var res = {
-		body: data
-	};
+	var res = { body: body };
+
 	clearTimeout(this._jsonp.timeout);
 
 	this._jsonp.callback.call(this, err, res);
+
+	removeCallback(this._jsonp);
 };
 
 jsonp.errorWrapper = function () {
 	var err = new Error('404 NotFound');
+
 	this._jsonp.callback.call(this, err, null);
+
+	removeCallback(this._jsonp);
 };
 
 var end = function end() {
-	var config = arguments.length <= 0 || arguments[0] === undefined ? { timeout: 1000 } : arguments[0];
+	var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	return function (callback) {
+		var callbackParam = config.callbackParam || 'callback';
+		var callbackName = config.callbackName || 'superagentCallback' + (new Date().valueOf() + parseInt(Math.random() * 1000));
+		var timeoutLimit = config.timeout || 1000;
 
-		var timeout = setTimeout(jsonp.errorWrapper.bind(this), config.timeout);
+		var timeout = setTimeout(jsonp.errorWrapper.bind(this), timeoutLimit);
 
 		this._jsonp = {
-			callbackParam: config.callbackParam || 'callback',
-			callbackName: config.callbackName || 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
+			callbackName: callbackName,
 			callback: callback,
 			timeout: timeout
 		};
 
-		window[this._jsonp.callbackName] = jsonp.callbackWrapper.bind(this);
+		window[callbackName] = jsonp.callbackWrapper.bind(this);
 
-		var params = _defineProperty({}, this._jsonp.callbackParam, this._jsonp.callbackName);
-
-		this._query.push(serialise(params));
+		this._query.push(encodeURIComponent(callbackParam) + '=' + encodeURIComponent(callbackName));
 		var queryString = this._query.join('&');
 
 		var s = document.createElement('script');
-		var separator = this.url.indexOf('?') > -1 ? '&' : '?';
-		var url = this.url + separator + queryString;
+		{
+			var separator = this.url.indexOf('?') > -1 ? '&' : '?';
+			var url = this.url + separator + queryString;
 
-		s.src = url;
-		document.getElementsByTagName('head')[0].appendChild(s);
+			s.src = url;
+		}
+
+		document.head.appendChild(s);
+		this._jsonp.script = s;
 
 		return this;
 	};
@@ -81,6 +84,10 @@ var end = function end() {
 // Prefer node/browserify style requires
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = jsonp;
+} else if (typeof define === "function" && define.amd) {
+	define([], function () {
+		return { jsonp: jsonp };
+	});
 } else if (typeof window !== 'undefined') {
 	window.superagentJSONP = jsonp;
 }

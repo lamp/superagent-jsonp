@@ -28,3 +28,5 @@ node_modules
 .lock-wscript
 
 bower_components/*
+
+package-lock.json

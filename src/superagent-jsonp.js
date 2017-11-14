@@ -1,86 +1,83 @@
-let serialise = function(obj) {
-  if (typeof obj != 'object') return obj;
-  let pairs = [];
-  for (let key in obj) {
-    if (null != obj[key]) {
-      pairs.push(encodeURIComponent(key)
-        + '=' + encodeURIComponent(obj[key]));
-    }
-  }
-  return pairs.join('&');
-}
+const removeCallback = function ({ script, callbackName } = {}) {
+  script && script.parentNode && script.parentNode.removeChild(script);
+  delete window[callbackName];
+};
 
 let jsonp = function(requestOrConfig) {
 	var reqFunc = function(request) {
 		// In case this is in nodejs, run without modifying request
 		if (typeof window == 'undefined') return request;
 
-		request.end = end.bind(request)(requestOrConfig);
+		request.end = end.call(request, requestOrConfig);
 		return request;
 	};
+
 	// if requestOrConfig is request
-	if(typeof requestOrConfig.end == 'function') {
+	if (typeof requestOrConfig.end == 'function') {
 		return reqFunc(requestOrConfig);
 	} else {
 		return reqFunc;
 	}
 };
 
-jsonp.callbackWrapper = function(data) {
-	let err = null;
-	let res = {
-		body: data
-	};
+jsonp.callbackWrapper = function (body) {
+	const err = null;
+  const res = { body };
+
   clearTimeout(this._jsonp.timeout);
 
-	this._jsonp.callback.call(this, err, res);
+  this._jsonp.callback.call(this, err, res);
+
+  removeCallback(this._jsonp);
 };
 
-jsonp.errorWrapper = function() {
-  const err = new Error('404 NotFound');
+jsonp.errorWrapper = function () {
+	let err = new Error('404 NotFound');
+
   this._jsonp.callback.call(this, err, null);
+
+  removeCallback(this._jsonp);
 };
 
-let end = function(config = { timeout: 1000 }) {
+let end = function(config = {}) {
 	return function(callback) {
+		const callbackParam = config.callbackParam || 'callback';
+    const callbackName = config.callbackName || `superagentCallback${new Date().valueOf() + parseInt(Math.random() * 1000)}`;
+    const timeoutLimit = config.timeout || 1000;
 
-    let timeout = setTimeout(
-      jsonp.errorWrapper.bind(this),
-      config.timeout
-    );
+    const timeout = setTimeout(jsonp.errorWrapper.bind(this), timeoutLimit);
 
-		this._jsonp = {
-			callbackParam: config.callbackParam || 'callback',
-			callbackName:  config.callbackName || 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
-			callback:				callback,
-      timeout:        timeout
-		};
+    this._jsonp = {
+      callbackName,
+			callback,
+			timeout,
+    };
 
-		window[this._jsonp.callbackName] = jsonp.callbackWrapper.bind(this);
+		window[callbackName] = jsonp.callbackWrapper.bind(this);
 
-		let params = {
-			[this._jsonp.callbackParam]: this._jsonp.callbackName
-		};
-
-		this._query.push(serialise(params));
+		this._query.push(`${encodeURIComponent(callbackParam)}=${encodeURIComponent(callbackName)}`);
 		let queryString = this._query.join('&');
 
 		let s = document.createElement('script');
-		let separator = (this.url.indexOf('?') > -1) ? '&': '?';
-		let url = this.url + separator + queryString;
+		{
+			let separator = (this.url.indexOf('?') > -1) ? '&': '?';
+			let url = this.url + separator + queryString;
 
-		s.src = url;
-		document.getElementsByTagName('head')[0].appendChild(s);
+			s.src = url;
+		}
+
+		document.head.appendChild(s);
+		this._jsonp.script = s;
 
 		return this;
 	}
 };
 
 // Prefer node/browserify style requires
-if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
-  module.exports = jsonp;
-} else if(typeof define==="function"&&define.amd) {
-	define([],function(){ return { jsonp: jsonp }; });
-} else if (typeof window !== 'undefined'){
-  window.superagentJSONP = jsonp;
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+	module.exports = jsonp;
+} else if (typeof define === "function" && define.amd) {
+	define([],function() { return { jsonp }; });
+} else if (typeof window !== 'undefined') {
+	window.superagentJSONP = jsonp;
 }

@@ -1,16 +1,15 @@
 // TODO: Move all of this setup into test helper
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
-import jsdom from 'jsdom';
+import { jsdom } from 'jsdom';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import jsonp from '../src/superagent-jsonp';
+import { type } from 'os';
 
 chai.use(sinonChai);
 
 let generateDOM = () => {
-  var jsdom = require('jsdom').jsdom;
-
   global.navigator = {
     userAgent: 'node.js'
   };
@@ -42,21 +41,19 @@ describe('SuperagentJSONP', () => {
     let requestMock = { end };
 
     context('when window is not defined', () => {
-
       it('does nothing', () => {
         expect(jsonp({})('hello')).to.eq('hello');
       });
     });
 
     context('when window is defined', () => {
-
       beforeEach(generateDOM);
       afterEach(tearDownDOM);
 
       it('sets up the request object', () => {
         let newRequest = jsonp({})(requestMock);
         expect(newRequest.end).not.to.eq(end);
-        expect(typeof newRequest.end).to.eq('function')
+        expect(typeof newRequest.end).to.eq('function');
       });
     });
 
