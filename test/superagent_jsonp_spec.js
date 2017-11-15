@@ -1,44 +1,43 @@
 // TODO: Move all of this setup into test helper
-import chai from 'chai';
+import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import { jsdom } from 'jsdom';
 import sinon from 'sinon';
-import { expect } from 'chai';
 import jsonp from '../src/superagent-jsonp';
-import { type } from 'os';
 
 chai.use(sinonChai);
 
-let generateDOM = () => {
+const generateDOM = () => {
   global.navigator = {
-    userAgent: 'node.js'
+    userAgent: 'node.js',
   };
 
   global.window = jsdom('<html><body></body></html>');
   global.document = window;
 };
 
-let tearDownDOM = () => {
+const tearDownDOM = () => {
   delete global.navigator;
   delete global.document;
   delete global.window;
 };
 
 describe('SuperagentJSONP', () => {
-  let sandbox, clock;
+  let sandbox;
+  let clock;
 
-  beforeEach(function() {
+  beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sinon.useFakeTimers();
   });
 
-  afterEach(function() {
+  afterEach(() => {
     sandbox.restore();
   });
 
   describe('#jsonp', () => {
-    let end = 'Hello ';
-    let requestMock = { end };
+    const end = 'Hello ';
+    const requestMock = { end };
 
     context('when window is not defined', () => {
       it('does nothing', () => {
@@ -51,17 +50,16 @@ describe('SuperagentJSONP', () => {
       afterEach(tearDownDOM);
 
       it('sets up the request object', () => {
-        let newRequest = jsonp({})(requestMock);
+        const newRequest = jsonp({})(requestMock);
         expect(newRequest.end).not.to.eq(end);
         expect(typeof newRequest.end).to.eq('function');
       });
     });
 
     context('when the url returns a 404', () => {
-
       const superagentMock = {
         _query: [],
-        url: 'http://test.com'
+        url: 'http://test.com',
       };
 
       beforeEach(generateDOM);
@@ -71,11 +69,11 @@ describe('SuperagentJSONP', () => {
         const callbackSpy = sandbox.spy();
         sinon.spy(jsonp, 'errorWrapper');
 
-        const newRequest = jsonp({ timeout: 100 })(superagentMock).end(callbackSpy);
+        jsonp({ timeout: 100 })(superagentMock).end(callbackSpy);
 
         clock.tick(110);
 
-        expect(jsonp.errorWrapper).to.have.been.called;
+        expect(jsonp.errorWrapper).to.have.been.called; // eslint-disable-line no-unused-expressions
         expect(callbackSpy).to.have.been.calledWith(new Error('404 NotFound'), null);
       });
     });

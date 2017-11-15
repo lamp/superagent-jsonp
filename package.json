@@ -11,8 +11,12 @@
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.9.0",
     "chai": "^3.3.0",
+    "eslint": "^4.11.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.2",
+    "gulp-eslint": "^4.0.0",
     "jsdom": "^9.2.1",
     "mocha": "^4.0.1",
     "mocha-babel": "^3.0.0",
@@ -21,6 +25,7 @@
   },
   "scripts": {
     "build": "gulp",
+    "lint": "eslint --fix src/*.js test/*.js",
     "test": "gulp && mocha --require babel-register test/*_spec.js"
   },
   "repository": {
