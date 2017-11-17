@@ -1,6 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -47,7 +47,7 @@ jsonp.errorWrapper = function () {
 };
 
 var end = function end() {
-	var config = arguments.length <= 0 || arguments[0] === undefined ? { timeout: 1000 } : arguments[0];
+	var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { timeout: 1000 };
 
 	return function (callback) {
 
@@ -81,6 +81,10 @@ var end = function end() {
 // Prefer node/browserify style requires
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = jsonp;
+} else if (typeof define === "function" && define.amd) {
+	define([], function () {
+		return { jsonp: jsonp };
+	});
 } else if (typeof window !== 'undefined') {
 	window.superagentJSONP = jsonp;
 }
