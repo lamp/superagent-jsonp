@@ -1,9 +1,21 @@
-var gulp = require('gulp');
-var babel = require('gulp-babel');
-require("babel-polyfill");
+const gulp = require('gulp');
+const babel = require('gulp-babel');
+const eslint = require('gulp-eslint');
 
-gulp.task('default', function () {
-    return gulp.src('src/superagent-jsonp.js')
-        .pipe(babel())
-        .pipe(gulp.dest('dist'));
+require('babel-polyfill');
+
+// Lint Task
+gulp.task('lint', function lint() {
+  return gulp.src(['src/*.js','test/*.js'])
+      .pipe(eslint())
+      .pipe(eslint.format());
 });
+
+// Assemble script
+gulp.task('scripts', function scripts() {
+  return gulp.src('src/superagent-jsonp.js')
+    .pipe(babel())
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('default', ['lint', 'scripts']);

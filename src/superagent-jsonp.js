@@ -1,86 +1,91 @@
-let serialise = function(obj) {
-  if (typeof obj != 'object') return obj;
-  let pairs = [];
-  for (let key in obj) {
-    if (null != obj[key]) {
-      pairs.push(encodeURIComponent(key)
-        + '=' + encodeURIComponent(obj[key]));
-    }
+const removeCallback = function ({ script, callbackName, timeout } = {}) {
+  if (script && script.parentNode) script.parentNode.removeChild(script);
+  delete window[callbackName];
+
+  clearTimeout(timeout); // clear timeout (for onerror event listener)
+};
+
+const jsonp = function (requestOrConfig) {
+  const end = function (config = {}) {
+    return function handler(callback) {
+      const callbackParam = config.callbackParam || 'callback';
+      const callbackName = config.callbackName || `superagentCallback${new Date().valueOf() + parseInt(Math.random() * 1000, 10)}`;
+      const timeoutLimit = config.timeout || 1000;
+
+      const timeout = setTimeout(jsonp.errorWrapper.bind(this), timeoutLimit);
+
+      this._jsonp = {
+        callbackName,
+        callback,
+        timeout,
+      };
+
+      window[callbackName] = jsonp.callbackWrapper.bind(this);
+
+      this._query.push(`${encodeURIComponent(callbackParam)}=${encodeURIComponent(callbackName)}`);
+      const queryString = this._query.join('&');
+
+      const s = document.createElement('script');
+      {
+        const separator = (this.url.indexOf('?') > -1) ? '&' : '?';
+        const url = this.url + separator + queryString;
+
+        s.src = url;
+
+        // Handle script load error #27
+        s.onerror = (e) => {
+          jsonp.errorWrapper.call(this, e);
+        };
+      }
+
+      document.head.appendChild(s);
+      this._jsonp.script = s;
+
+      return this;
+    };
+  };
+
+  const reqFunc = function (request) {
+    // In case this is in nodejs, run without modifying request
+    if (typeof window === 'undefined') return request;
+
+    request.end = end.call(request, requestOrConfig);
+    return request;
+  };
+
+  // if requestOrConfig is request
+  if (typeof requestOrConfig.end === 'function') {
+    return reqFunc(requestOrConfig);
   }
-  return pairs.join('&');
-}
 
-let jsonp = function(requestOrConfig) {
-	var reqFunc = function(request) {
-		// In case this is in nodejs, run without modifying request
-		if (typeof window == 'undefined') return request;
-
-		request.end = end.bind(request)(requestOrConfig);
-		return request;
-	};
-	// if requestOrConfig is request
-	if(typeof requestOrConfig.end == 'function') {
-		return reqFunc(requestOrConfig);
-	} else {
-		return reqFunc;
-	}
+  return reqFunc;
 };
 
-jsonp.callbackWrapper = function(data) {
-	let err = null;
-	let res = {
-		body: data
-	};
-  clearTimeout(this._jsonp.timeout);
+jsonp.callbackWrapper = function callbackWrapper(body) {
+  const err = null;
+  const res = { body };
 
-	this._jsonp.callback.call(this, err, res);
+  this._jsonp.callback.call(this, err, res);
+
+  removeCallback(this._jsonp);
 };
 
-jsonp.errorWrapper = function() {
-  const err = new Error('404 NotFound');
+jsonp.errorWrapper = function errorWrapper(error) {
+  let err = new Error('404 Not found');
+  if (error && error instanceof Event && error.type === 'error') {
+    err = new Error('Connection issue');
+  }
+
   this._jsonp.callback.call(this, err, null);
-};
 
-let end = function(config = { timeout: 1000 }) {
-	return function(callback) {
-
-    let timeout = setTimeout(
-      jsonp.errorWrapper.bind(this),
-      config.timeout
-    );
-
-		this._jsonp = {
-			callbackParam: config.callbackParam || 'callback',
-			callbackName:  config.callbackName || 'superagentCallback' + new Date().valueOf() + parseInt(Math.random() * 1000),
-			callback:				callback,
-      timeout:        timeout
-		};
-
-		window[this._jsonp.callbackName] = jsonp.callbackWrapper.bind(this);
-
-		let params = {
-			[this._jsonp.callbackParam]: this._jsonp.callbackName
-		};
-
-		this._query.push(serialise(params));
-		let queryString = this._query.join('&');
-
-		let s = document.createElement('script');
-		let separator = (this.url.indexOf('?') > -1) ? '&': '?';
-		let url = this.url + separator + queryString;
-
-		s.src = url;
-		document.getElementsByTagName('head')[0].appendChild(s);
-
-		return this;
-	}
+  removeCallback(this._jsonp);
 };
 
 // Prefer node/browserify style requires
-if(typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = jsonp;
-} else if(typeof define==="function"&&define.amd) {
-	define([],function(){ return { jsonp: jsonp }; });
-} else if (typeof window !== 'undefined'){
+} else if (typeof define === 'function' && define.amd) {
+  define([], () => ({ jsonp }));
+} else if (typeof window !== 'undefined') {
   window.superagentJSONP = jsonp;
 }
