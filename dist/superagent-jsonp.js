@@ -1,12 +1,12 @@
 'use strict';
 
-var removeCallback = function removeCallback() {
-  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      script = _ref.script,
+var removeCallback = function removeCallback(_ref) {
+  var script = _ref.script,
       callbackName = _ref.callbackName,
       timeout = _ref.timeout;
 
   if (script && script.parentNode) script.parentNode.removeChild(script);
+
   delete window[callbackName];
 
   clearTimeout(timeout); // clear timeout (for onerror event listener)
@@ -76,9 +76,9 @@ jsonp.callbackWrapper = function callbackWrapper(body) {
   var err = null;
   var res = { body: body };
 
-  this._jsonp.callback.call(this, err, res);
-
   removeCallback(this._jsonp);
+
+  this._jsonp.callback.call(this, err, res);
 };
 
 jsonp.errorWrapper = function errorWrapper(error) {
@@ -87,9 +87,9 @@ jsonp.errorWrapper = function errorWrapper(error) {
     err = new Error('Connection issue');
   }
 
-  this._jsonp.callback.call(this, err, null);
-
   removeCallback(this._jsonp);
+
+  this._jsonp.callback.call(this, err, null);
 };
 
 // Prefer node/browserify style requires
