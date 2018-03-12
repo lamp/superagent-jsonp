@@ -76,6 +76,16 @@ describe('SuperagentJSONP', () => {
         expect(jsonp.errorWrapper).to.have.been.called; // eslint-disable-line no-unused-expressions
         expect(callbackSpy).to.have.been.calledWith(new Error('404 NotFound'), null);
       });
+
+      it('script and window callback are correctly removed', () => {
+        const callbackName = 'testErrorCb';
+        jsonp({ timeout: 10, callbackName })(superagentMock).end(() => {});
+
+        clock.tick(15);
+
+        expect(typeof window[callbackName]).to.eq('undefined');
+        expect(document.querySelectorAll('script').length).to.eq(0);
+      });
     });
   });
 });
